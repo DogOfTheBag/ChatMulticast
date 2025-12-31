@@ -5,7 +5,9 @@ import alber.data.Receptor;
 import alber.data.Usuario;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class VentanaChat extends JDialog {
     private JPanel contentPane;
@@ -19,46 +21,103 @@ public class VentanaChat extends JDialog {
 
     public VentanaChat(Usuario user) {
         this.user = user;
+
+
+        setTitle("Chat - " + user.getNombre());
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
         setContentPane(contentPane);
-        setModal(true);
         getRootPane().setDefaultButton(buttonEnviar);
+        setVisible(true);
+        //esto hace que el foco este en el area de texto de escritura al entrar
+        SwingUtilities.invokeLater(() -> textAreaInput.requestFocusInWindow());
+
+
+        try{
+            chat = new Chat();
+            receptor = new Receptor(this);
+            receptor.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         buttonEnviar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onOK();
+                try {
+                    enviarMensaje();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
         buttonSalir.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onCancel();
+                onSalir();
             }
         });
 
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+        textAreaInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_ENTER){
+                    e.consume();
+                    try{
+                        enviarMensaje();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+
+                // call onCancel() when cross is clicked
+                setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                onCancel();
+                onSalir();
             }
         });
 
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onCancel();
+                onSalir();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
-    private void onOK() {
-        // add your code here
+    private void onSalir() {
+        try{
+         chat.enviarMensajeByte(user.getNombre() + " ha salido del chat");
+         receptor.cerrar();
+         chat.cerrarSocket();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         dispose();
+
     }
 
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
+    private void enviarMensaje() throws IOException {
+        String texto = textAreaInput.getText().trim();
+        if(texto.isBlank()){
+            return;
+        }
+        chat.enviarMensajeByte(texto);
+        textAreaInput.setText("");
+        textAreaInput.requestFocusInWindow();
+
     }
 
+    public void añadirMensaje(String texto) {
+        SwingUtilities.invokeLater(() -> textAreaChat.append(texto + "\n"));
+    }
+
+    public Usuario getUser() {
+        return user;
+    }
 }

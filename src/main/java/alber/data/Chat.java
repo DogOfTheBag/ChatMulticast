@@ -14,7 +14,7 @@ public class Chat {
 
     /*Cada vez que hagamos una instancia del chat, haremos el socket y le pasaremos la dirección ip del chat donde estamos*/
     public Chat() throws IOException {
-        socket = new MulticastSocket(PUERTO);
+        socket = new MulticastSocket();
         direccion = InetAddress.getByName(GRUPO); //hemos puesto grupo en string ya que ahora usamos getByName para coger la ip por el nombre
     }
 

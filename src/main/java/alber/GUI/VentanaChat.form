@@ -69,6 +69,8 @@
               </grid>
             </constraints>
             <properties>
+              <editable value="false"/>
+              <font name="Arial" size="12" style="0"/>
               <text value=""/>
             </properties>
           </component>

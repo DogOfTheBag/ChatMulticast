@@ -50,6 +50,7 @@ public class Receptor extends Thread{
 			    para evitarnos problemas, le pasamos directamente al string desde que byte empezamos y cuanta longitud tiene el paquete
 			    y asi leemos exactamente lo que queremos.*/
                 String mensaje = new String(paquete.getData(),0, paquete.getLength());
+                ventana.añadirMensaje(ventana.getUser().getNombre() + ": " + mensaje);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

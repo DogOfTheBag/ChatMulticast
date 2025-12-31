@@ -6,7 +6,7 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        String nombre = JOptionPane.showInputDialog(null,"Introduce tu nombre de usuario.", "Inicio de sesión");
+        String nombre = JOptionPane.showInputDialog(null,"Introduce tu nombre de usuario.", "Inicio de sesión",JOptionPane.QUESTION_MESSAGE);
         if(nombre != null && nombre.trim().isBlank())
             nombre = "Invitado";
 
