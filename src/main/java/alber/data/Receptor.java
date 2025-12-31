@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.UnknownHostException;
 
 /*Es importante que esta clase extienda de hilo debido a que el programa ahora mismo quizá no, pero si hay mucha
 * gente hablando a la vez, recibirá mensajes a la vez, por lo que lo gestionaremos usando hilos para que no explote.*/
@@ -50,7 +49,7 @@ public class Receptor extends Thread{
 			    para evitarnos problemas, le pasamos directamente al string desde que byte empezamos y cuanta longitud tiene el paquete
 			    y asi leemos exactamente lo que queremos.*/
                 String mensaje = new String(paquete.getData(),0, paquete.getLength());
-                ventana.añadirMensaje(ventana.getUser().getNombre() + ": " + mensaje);
+                ventana.añadirMensaje(mensaje);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
