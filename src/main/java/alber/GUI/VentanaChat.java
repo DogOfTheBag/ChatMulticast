@@ -21,7 +21,7 @@ public class VentanaChat extends JDialog {
 
     public VentanaChat(Usuario user) {
         this.user = user;
-
+        /******************CREACION DE LA VENTANA ANTES HECHA CON EL EDITOR****************/
         contentPane = new JPanel(new BorderLayout(10, 10));
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -57,6 +57,10 @@ public class VentanaChat extends JDialog {
         //esto hace que el foco este en el area de texto de escritura al entrar
         SwingUtilities.invokeLater(() -> textAreaInput.requestFocusInWindow());
 
+        /******************CREACION DE LA VENTANA ANTES HECHA CON EL EDITOR****************/
+
+        /*Todavia estamos en el constructor asi que cuando hagamos una instancia de la ventana, hacemos
+        * un try catch para conectar con el chat.*/
         try {
             chat = new Chat();
             receptor = new Receptor(this);
@@ -66,6 +70,7 @@ public class VentanaChat extends JDialog {
             throw new RuntimeException(e);
         }
 
+        //los eventos de los botones
         buttonEnviar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -78,14 +83,15 @@ public class VentanaChat extends JDialog {
 
         buttonSalir.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onSalir();
+                Salir();
             }
         });
-
+        /*Esto basicamente es el listener del enter para enviar el mensaje*/
         textAreaInput.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    //consume hace que se quite el \n que pone el enter automaticamente y asi se envie el mensaje sin eso
                     e.consume();
                     try {
                         enviarMensaje();
@@ -96,22 +102,19 @@ public class VentanaChat extends JDialog {
             }
         });
 
+        //para cerrar la app al cerrar la ventana
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                onSalir();
+                Salir();
             }
         });
-
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onSalir();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
-    private void onSalir() {
+    //METODOS AUXILIARES
+    private void Salir() {
         try {
+            //al salir chapamos todo
             chat.enviarMensajeByte(user.getNombre() + " ha salido del chat");
             receptor.cerrar();
             chat.cerrarSocket();
@@ -122,6 +125,7 @@ public class VentanaChat extends JDialog {
     }
 
     private void enviarMensaje() throws IOException {
+        /*coge el texto, recorta espacios, lo manda, pone el input vacio y le devuelve el foco por si acaso*/
         String texto = textAreaInput.getText().trim();
         if (texto.isBlank()) {
             return;
@@ -131,11 +135,11 @@ public class VentanaChat extends JDialog {
         textAreaInput.requestFocusInWindow();
     }
 
+    /*En caso de que mandes mensajes muy a la vez, es posible que Swing se quede pillado o explote, debido a que al parecer
+    * no maneja demasiado bien el uso de varios hilos
+    * para evitar problemas tenemos el uso de SwingUtilities.invokeLater, que basicamente lo que hace en este caso es que
+    * pone el mensaje que añadamos en una especie de cola, y hasta que todo lo anterior no haya sido pintado no pinta este*/
     public void añadirMensaje(String texto) {
         SwingUtilities.invokeLater(() -> textAreaChat.append(texto + "\n"));
-    }
-
-    public Usuario getUser() {
-        return user;
     }
 }
